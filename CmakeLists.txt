@@ -8,4 +8,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(
     MyRenderer
     src/main.cpp
+    src/DepthBuffer/Depthbuffer.cpp
+    src/Framebuffer/Framebuffer.cpp
+    src/Math/Vector.cpp
+    include/Rasterizer/Rasterizer.h
+)
+
+
+
+target_include_directories(MyRenderer
+
+    PRIVATE
+
+        include
+
 )

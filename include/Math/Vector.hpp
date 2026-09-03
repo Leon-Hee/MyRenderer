@@ -49,7 +49,8 @@ public:
     float& operator[](int index);
     Vector3f operator/(const float a) const {return Vector3f(x / a, y / a, z / a);};
     Vector3f& operator+=(const Vector3f& v){x += v.x; y += v.y; z += v.z; return *this;};
-    
+    Vector3f normalized() const;
+    Vector3f& normalize();
 };
 class Vector4f {
 public:
@@ -136,4 +137,28 @@ inline Vector3f crossProduct(const Vector3f &a, const Vector3f &b)
             a.z * b.x - a.x * b.z,
             a.x * b.y - a.y * b.x
     );
+}
+
+inline Vector4f toVec4(const Vector3f& v) {
+    return Vector4f(v.x, v.y, v.z, 1.0f);
+}
+
+inline Vector3f Vector3f::normalized() const{
+    float length = norm();
+    if(length == 0){
+        return Vector3f();
+    }
+    return *this / length;
+}
+
+inline Vector3f& Vector3f::normalize(){
+    float length = norm();
+    if(length == 0){
+        return *this;
+    }
+    x /= length;
+    y /= length;
+    z /= length;
+
+    return *this;
 }
