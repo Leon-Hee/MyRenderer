@@ -10,6 +10,10 @@ public:
               const Vector4f& v1,
               const Vector4f& v2);
 
+    Triangles(const Vector3f& vert0_,
+              const Vector3f& vert1_,
+              const Vector3f& vert2_);
+
     Vector4f getV0() const;
     Vector4f getV1() const;
     Vector4f getV2() const;
@@ -24,6 +28,10 @@ private:
     Vector4f v0;
     Vector4f v1;
     Vector4f v2;
+
+    Vector3f vert0;
+    Vector3f vert1;
+    Vector3f vert2;
 
     Vector4f vertices[3];
 };

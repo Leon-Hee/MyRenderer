@@ -26,12 +26,19 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
                 continue;
             }
             auto[alpha, beta, gamma] = barycentric(pixel_x, pixel_y, triangles);
-            float Z = 1.0f / (alpha / vertices[0].w + beta / vertices[1].w + gamma / vertices[2].w);
-            float zp = alpha * vertices[0].z / vertices[0].w + beta * vertices[1].z / vertices[1].w + gamma * vertices[2].z / vertices[2].w;
-            zp *= Z;
-            if(depthbuffer.getDepthBuffer(x, y) > zp){
+            float zp = alpha * vertices[0].z + beta * vertices[1].z + gamma * vertices[2].z;
+            float oldDepth = depthbuffer.getDepthBuffer(x, y);
+            if (oldDepth > zp) {
                 depthbuffer.setDepthBuffer(x, y, zp);
-                Vector3f color_interpolate = interpolate(alpha, beta, gamma, triangles.color[0], triangles.color[1], triangles.color[2], 1);
+                Vector3f color_interpolate = interpolate(
+                    alpha,
+                    beta,
+                    gamma,
+                    triangles.color[0],
+                    triangles.color[1],
+                    triangles.color[2],
+                    1
+                );
                 framebuffer.setPixel(x, y, color_interpolate);
             }
         }

@@ -23,13 +23,5 @@ int Depthbuffer::getIndex(int x, int y) const
 }
 
 void Depthbuffer::clear(){
-    std::fill(
-
-        depthbuffer.begin(),
-
-        depthbuffer.end(),
-
-        1.0f
-
-    );
+    std::fill(depthbuffer.begin(), depthbuffer.end(), 1.0f);
 }

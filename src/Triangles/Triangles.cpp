@@ -18,6 +18,8 @@ Triangles::Triangles(const Vector4f& v0_,
 {
 }
 
+Triangles::Triangles(const Vector3f& vert0_, const Vector3f& vert1_, const Vector3f& vert2_) : vert0(vert0_), vert1(vert1_), vert2(vert2_) {}
+
 
 Vector4f Triangles::getV0() const
 {

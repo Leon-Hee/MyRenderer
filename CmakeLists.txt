@@ -8,11 +8,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(
     MyRenderer
     src/main.cpp
+    src/Math/Vector.cpp
+    src/Transform/Transform.cpp
     src/DepthBuffer/Depthbuffer.cpp
     src/Framebuffer/Framebuffer.cpp
-    src/Math/Vector.cpp
-    src/Rasterizer/RasterizerTriangles.cpp
+    src/Rasterizer/Rasterizer.cpp
     src/Triangles/Triangles.cpp
+    src/Transform/Viewport.cpp
 )
 
 target_include_directories(
