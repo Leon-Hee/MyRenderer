@@ -1,7 +1,8 @@
-#include "Framebuffer.h"
+#include "Framebuffer/Framebuffer.h"
 #include <fstream>
 #include <cstdint>
 #include <stdexcept>
+#include <algorithm>
 
 Framebuffer::Framebuffer(int width_, int height_) : width(width_), height(height_), pixel(width_ * height_){
 }
@@ -14,22 +15,22 @@ int Framebuffer::getHeight() const{
     return height;
 }
 
-void Framebuffer::setPixel(int x, int y, const Color& color){
+void Framebuffer::setPixel(int x, int y, const Vector3f& color){
     if(x >= width || x < 0 || y >= height || y < 0){
         return;
     }
     pixel[y * width + x] = color;
 }
 
-Color Framebuffer::getPixel(int x, int y){
+Vector3f Framebuffer::getPixel(int x, int y){
     if(x >= width || x < 0 || y >= height || y < 0){
         throw std::out_of_range("Framebuffer coordinate out of range");
     }
     return pixel[y * width + x];
 }
 
-void Framebuffer::clear(const Color& color){
-    for(Color& c : pixel){
+void Framebuffer::clear(const Vector3f& color){
+    for(Vector3f& c : pixel){
         c = color;
     }
 }
@@ -46,10 +47,10 @@ void Framebuffer::save(const std::string& path){
 
     for(int y = height - 1; y >= 0; y--){
         for(int x = 0; x < width; x++){
-            const Color& color = pixel[y * width + x];
-            uint8_t r = static_cast<uint8_t>(color.r());
-            uint8_t g = static_cast<uint8_t>(color.g());
-            uint8_t b = static_cast<uint8_t>(color.b());
+            const Vector3f& color = pixel[y * width + x];
+            uint8_t r = static_cast<uint8_t>(std::clamp(color.x, 0.0f, 1.0f) * 255.0f);
+            uint8_t g = static_cast<uint8_t>(std::clamp(color.y, 0.0f, 1.0f) * 255.0f);
+            uint8_t b = static_cast<uint8_t>(std::clamp(color.z, 0.0f, 1.0f) * 255.0f);
             file.write(reinterpret_cast<const char*>(&r), 1);//reinterpret_cast<const char*>只是把这个地址当成 const char* 来看，没有改变地址
             file.write(reinterpret_cast<const char*>(&g), 1);
             file.write(reinterpret_cast<const char*>(&b), 1);

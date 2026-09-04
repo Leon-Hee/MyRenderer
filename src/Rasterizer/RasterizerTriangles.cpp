@@ -1,5 +1,9 @@
 #include "Rasterizer/Rasterizer.h"
 
+static Vector3f interpolate(float alpha, float beta, float gamma, const Vector3f& vert1, const Vector3f& vert2, const Vector3f& vert3, float weight){
+    return (alpha * vert1 + beta * vert2 + gamma * vert3) / weight;
+}
+
 void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer) const {
     const Vector4f* vertices = triangles.getList();
     int width = framebuffer.getWidth();
@@ -14,27 +18,27 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
     int bbmin_y = std::max(0, static_cast<int>(std::floor(bbminy)));
     int bbmax_y = std::min(height - 1, static_cast<int>(std::ceil(bbmaxy)));
 
-    for(int y = bbmin_y; y < bbmax_y; y++){
-        for(int x = bbmin_x; x < bbmax_x; x++){
+    for(int y = bbmin_y; y <= bbmax_y; y++){
+        for(int x = bbmin_x; x <= bbmax_x; x++){
             float pixel_x = x + 0.5f;
             float pixel_y = y + 0.5f;
             if(!isInside(pixel_x, pixel_y, triangles)){
                 continue;
             }
-            auto[alpha, beta, gamma] = barycentric(x, y, triangles);
-            float Z = 1.0 / (alpha / vertices[0].w + beta / vertices[1].w + gamma / vertices[2].w);
+            auto[alpha, beta, gamma] = barycentric(pixel_x, pixel_y, triangles);
+            float Z = 1.0f / (alpha / vertices[0].w + beta / vertices[1].w + gamma / vertices[2].w);
             float zp = alpha * vertices[0].z / vertices[0].w + beta * vertices[1].z / vertices[1].w + gamma * vertices[2].z / vertices[2].w;
             zp *= Z;
             if(depthbuffer.getDepthBuffer(x, y) > zp){
                 depthbuffer.setDepthBuffer(x, y, zp);
-
+                Vector3f color_interpolate = interpolate(alpha, beta, gamma, triangles.color[0], triangles.color[1], triangles.color[2], 1);
+                framebuffer.setPixel(x, y, color_interpolate);
             }
         }
     }
 }
 
 bool Rasterizer::isInside(const float x, const float y, const Triangles& triangles) const {
-    Vector3f p(x, y, 0.0f);
     Vector3f bary = barycentric(x, y, triangles);
     return bary.x >= 0.0f &&
            bary.y >= 0.0f &&
@@ -70,3 +74,6 @@ Vector3f Rasterizer::barycentric(float x, float y, const Triangles& triangles) c
         u.x / u.z
     );
 }
+
+
+

@@ -11,15 +11,12 @@ add_executable(
     src/DepthBuffer/Depthbuffer.cpp
     src/Framebuffer/Framebuffer.cpp
     src/Math/Vector.cpp
-    include/Rasterizer/Rasterizer.h
+    src/Rasterizer/RasterizerTriangles.cpp
+    src/Triangles/Triangles.cpp
 )
 
-
-
-target_include_directories(MyRenderer
-
+target_include_directories(
+    MyRenderer
     PRIVATE
-
-        include
-
+        ${PROJECT_SOURCE_DIR}/include
 )

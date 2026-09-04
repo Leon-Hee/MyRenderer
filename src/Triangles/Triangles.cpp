@@ -1,4 +1,4 @@
-#include "Triangles.h"
+#include "Triangle/Triangles.h"
 
 Triangles::Triangles()
     : v0(0.0f),
@@ -37,4 +37,16 @@ Vector4f Triangles::getV2() const
 const Vector4f* Triangles::getList() const
 {
     return vertices;
+}
+
+void Triangles::setColor(int index, float r, float g, float b){
+    color[index].x = r;
+    color[index].y = g;
+    color[index].z = b;
+}
+
+void Triangles::setColors(const std::array<Vector3f, 3>& colors){
+    for(int i = 0; i < 3; i++){
+        color[i] = colors[i];
+    }
 }

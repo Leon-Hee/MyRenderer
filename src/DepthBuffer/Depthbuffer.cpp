@@ -1,8 +1,8 @@
-#include "DepthBuffer.h"
+#include "DepthBuffer/Depthbuffer.h"
 #include <stdexcept>
 #include <limits>
 
-Depthbuffer::Depthbuffer(int width_, int height_) : width(width_), height(height_), depthbuffer(width_ * height_, std::numeric_limits<float>::max()){}
+Depthbuffer::Depthbuffer(int width_, int height_) : width(width_), height(height_), depthbuffer(width_ * height_, 1.0f){}
 
 void Depthbuffer::setDepthBuffer(const int x, const int y, const float depth)
 {
@@ -22,3 +22,14 @@ int Depthbuffer::getIndex(int x, int y) const
     return y * width + x;
 }
 
+void Depthbuffer::clear(){
+    std::fill(
+
+        depthbuffer.begin(),
+
+        depthbuffer.end(),
+
+        1.0f
+
+    );
+}

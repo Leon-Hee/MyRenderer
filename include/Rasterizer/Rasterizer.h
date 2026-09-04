@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Triangles.h"
-#include "Framebuffer.h"
-#include "Depthbuffer.h"
+#include "Triangle/Triangles.h"
+#include "Framebuffer/Framebuffer.h"
+#include "DepthBuffer/Depthbuffer.h"
 
 class Rasterizer
 {
