@@ -35,6 +35,12 @@ void Framebuffer::clear(const Vector3f& color){
     }
 }
 
+void Framebuffer::clear(){
+    for(Vector3f&c : pixel){
+        c = Vector3f(1.0f, 1.0f, 1.0f);
+    }
+}
+
 void Framebuffer::save(const std::string& path){
     std::ofstream file(path, std::ios::binary);
     if(!file){

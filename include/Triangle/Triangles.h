@@ -21,17 +21,23 @@ public:
 
     void setColors(const std::array<Vector3f, 3>& colors);
 
+    bool isVec4 = false;
+
+    Triangles toVec4T(const Triangles& t);
 
     const Vector4f* getList() const;
+    const Vector3f* getListVec3() const;
+
+
+    Vector3f vert0;
+    Vector3f vert1;
+    Vector3f vert2;
 
 private:
     Vector4f v0;
     Vector4f v1;
     Vector4f v2;
 
-    Vector3f vert0;
-    Vector3f vert1;
-    Vector3f vert2;
-
     Vector4f vertices[3];
+    Vector3f verts[3];
 };

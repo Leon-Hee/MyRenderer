@@ -95,5 +95,8 @@ Mat4 getMVP(const Mat4& model, const Mat4& view, const Mat4& projection)
 }
 
 Vector3f perspectiveDivide(const Vector4f& clip){
+    if(clip.w == 0.0f){
+        throw std::runtime_error("Zero Divided.");
+    }
     return Vector3f(clip.x / clip.w, clip.y / clip.w, clip.z / clip.w);
 }

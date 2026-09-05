@@ -1,5 +1,7 @@
-2026-9-2 实现数学库，包含vector，mat的函数。
+September 2, 2026: Implemented the math library, including vector and matrix operations.
 
-2026-9-3 在写Rasterizer函数，未完成。
+September 3, 2026: Started implementing the Rasterizer functions; the implementation was not yet complete.
 
-2026-9-4 完成Rasterizer函数，实现三角形绘制和深度检测，同时完成MVP坐标变换。
+September 4, 2026: Completed the Rasterizer implementation, including triangle rasterization and depth testing. Also completed MVP coordinate transformations.
+
+September 5, 2026: Completed the Render function and implemented polygon clipping in clip space.

@@ -1,11 +1,12 @@
 #include "Rasterizer/Rasterizer.h"
+#include <iostream>
 
 static Vector3f interpolate(float alpha, float beta, float gamma, const Vector3f& vert1, const Vector3f& vert2, const Vector3f& vert3, float weight){
     return (alpha * vert1 + beta * vert2 + gamma * vert3) / weight;
 }
 
 void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer) const {
-    const Vector4f* vertices = triangles.getList();
+    const Vector3f* vertices = triangles.getListVec3();
     int width = framebuffer.getWidth();
     int height = framebuffer.getHeight();
     float bbminx = std::min(vertices[0].x, std::min(vertices[1].x, vertices[2].x));
@@ -26,6 +27,7 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
                 continue;
             }
             auto[alpha, beta, gamma] = barycentric(pixel_x, pixel_y, triangles);
+
             float zp = alpha * vertices[0].z + beta * vertices[1].z + gamma * vertices[2].z;
             float oldDepth = depthbuffer.getDepthBuffer(x, y);
             if (oldDepth > zp) {
@@ -47,16 +49,18 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
 
 bool Rasterizer::isInside(const float x, const float y, const Triangles& triangles) const {
     Vector3f bary = barycentric(x, y, triangles);
-    return bary.x >= 0.0f &&
-           bary.y >= 0.0f &&
-           bary.z >= 0.0f;
+    const float epsilon = 1e-6f;
+
+    return bary.x >= -epsilon &&
+        bary.y >= -epsilon &&
+        bary.z >= -epsilon;
 }
 
 Vector3f Rasterizer::barycentric(float x, float y, const Triangles& triangles) const
 {
-    Vector4f v0 = triangles.getV0();
-    Vector4f v1 = triangles.getV1();
-    Vector4f v2 = triangles.getV2();
+    Vector3f v0 = triangles.vert0;
+    Vector3f v1 = triangles.vert1;
+    Vector3f v2 = triangles.vert2;
 
     Vector3f u = crossProduct(
         Vector3f(

@@ -12,6 +12,7 @@ public:
     Vector3f getPixel(int x, int y);
 
     void clear(const Vector3f& color);
+    void clear();
     void save(const std::string& path);
 private:
     int width, height;

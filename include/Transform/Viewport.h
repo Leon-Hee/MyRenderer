@@ -6,7 +6,7 @@ class Viewport{
 public:
     Viewport(int width, int height);
 
-    Vector3f transform(const Vector3f& ndc) const;
+    static Vector3f transform(const Vector3f& ndc, int width, int height);
 
 private:
     int width;
