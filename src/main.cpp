@@ -19,9 +19,9 @@ int main()
     framebuffer.clear();
     depthbuffer.clear();
 
-    // ==============================
-    // 1. Perspective Projection
-    // ==============================
+    // =========================
+    // Projection
+    // =========================
 
     float fov = 60.0f;
     float aspect = static_cast<float>(width) / height;
@@ -35,30 +35,85 @@ int main()
         zFar
     );
 
-    // ==============================
-    // 2. Triangle
-    // ==============================
+    // =========================
+    // 1. Front Face
+    // 左下
+    // =========================
 
-    // 近处三角形
-    Triangles nearTri(
-        Vector3f(1.0f, -1.0f, -2.0f),
-        Vector3f( 2.0f, -1.0f, -2.0f),
-        Vector3f( 1.0f,  1.0f, -2.0f)
+    Triangles front1(
+        Vector3f(-3.0f, -1.0f, -3.0f),
+        Vector3f(-1.0f, -1.0f, -3.0f),
+        Vector3f(-2.0f,  1.0f, -3.0f)
     );
 
-    // 远处三角形
-    Triangles farTri(
-        Vector3f(-1.0f, -1.0f, -6.0f),
-        Vector3f(-2.0f, -1.0f, -6.0f),
-        Vector3f( -1.0f,  1.0f, -6.0f)
+    // =========================
+    // 2. Back Face
+    // 反转 1 的 winding
+    // =========================
+
+    /*Triangles back1(
+        Vector3f(1.0f, -1.0f, -3.0f),
+        Vector3f(0.0f,  1.0f, -3.0f),
+        Vector3f(2.0f, -1.0f, -3.0f)
+    );*/
+
+    Triangles back1(
+    Vector3f(1.0f, -1.0f, -3.0f),
+    Vector3f(2.0f, -1.0f, -3.0f),
+    Vector3f(0.0f,  1.0f, -3.0f)
     );
 
-    // ==============================
-    // 3. Render
-    // ==============================
+
+
+    // =========================
+    // 3. Front Face
+    // 右上
+    // =========================
+
+    Triangles front2(
+        Vector3f(1.0f, 1.0f, -3.0f),
+        Vector3f(3.0f, 1.0f, -3.0f),
+        Vector3f(2.0f, 3.0f, -3.0f)
+    );
+
+    // =========================
+    // 4. Back Face
+    // =========================
+
+    Triangles back2(
+        Vector3f(4.0f, 1.0f, -3.0f),
+        Vector3f(5.0f, 3.0f, -3.0f),
+        Vector3f(6.0f, 1.0f, -3.0f)
+    );
+
+    // =========================
+    // 5. Very Thin Triangle
+    // 测试 EPSILON
+    // =========================
+
+    Triangles thin(
+        Vector3f(-3.0f, 3.0f, -3.0f),
+        Vector3f(-1.0f, 3.0f, -3.0f),
+        Vector3f(-2.0f, 3.000001f, -3.0f)
+    );
+
+    // =========================
+    // 6. Degenerate Triangle
+    // 三点共线
+    // =========================
+
+    Triangles degenerate(
+        Vector3f(3.0f, -3.0f, -3.0f),
+        Vector3f(4.0f, -2.0f, -3.0f),
+        Vector3f(5.0f, -1.0f, -3.0f)
+    );
+
+    // =========================
+    // Render
+    // =========================
 
     render::RenderTriangles(
-        nearTri,
+        front1,
         framebuffer,
         depthbuffer,
         projection,
@@ -67,7 +122,7 @@ int main()
     );
 
     render::RenderTriangles(
-        farTri,
+        back1,
         framebuffer,
         depthbuffer,
         projection,
@@ -75,14 +130,50 @@ int main()
         height
     );
 
-    // ==============================
-    // 4. Save
-    // ==============================
+    render::RenderTriangles(
+        front2,
+        framebuffer,
+        depthbuffer,
+        projection,
+        width,
+        height
+    );
 
-    framebuffer.save("perspective_test.ppm");
+    render::RenderTriangles(
+        back2,
+        framebuffer,
+        depthbuffer,
+        projection,
+        width,
+        height
+    );
 
-    std::cout << "Perspective test finished!\n";
-    std::cout << "Output: perspective_test.ppm\n";
+    render::RenderTriangles(
+        thin,
+        framebuffer,
+        depthbuffer,
+        projection,
+        width,
+        height
+    );
+
+    render::RenderTriangles(
+        degenerate,
+        framebuffer,
+        depthbuffer,
+        projection,
+        width,
+        height
+    );
+
+    // =========================
+    // Save
+    // =========================
+
+    framebuffer.save("culling_test.ppm");
+
+    std::cout << "Back-face culling test finished!\n";
+    std::cout << "Output: culling_test.ppm\n";
 
     return 0;
 }

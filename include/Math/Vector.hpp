@@ -139,6 +139,10 @@ inline Vector3f crossProduct(const Vector3f &a, const Vector3f &b)
     );
 }
 
+inline float crossProduct(const Vector2f& a, const Vector2f&b){
+    return a.x * b.y - a.y * b.x;
+}
+
 inline Vector4f toVec4(const Vector3f& v) {
     return Vector4f(v.x, v.y, v.z, 1.0f);
 }

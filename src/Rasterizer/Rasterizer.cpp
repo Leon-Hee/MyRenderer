@@ -88,3 +88,5 @@ Vector3f Rasterizer::barycentric(float x, float y, const Triangles& triangles) c
 
 
 
+
+
