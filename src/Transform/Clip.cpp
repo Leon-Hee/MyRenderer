@@ -1,5 +1,6 @@
 #include "Transform/Clip.h"
 
+
 bool Clip::inside(const Vector4f& v, ClipPlane clipPlane){
     switch (clipPlane)
     {
@@ -21,10 +22,12 @@ bool Clip::inside(const Vector4f& v, ClipPlane clipPlane){
     }
 }
 
-Vector4f Clip::intersect(const Vector4f& a, const Vector4f& b, ClipPlane clipPlane){
+Vertex Clip::intersect(const Vertex& _a, const Vertex& _b, ClipPlane clipPlane){
     float aValue;
     float bValue;
     float t;
+    const Vector4f a = _a.position;
+    const Vector4f b = _b.position;
     switch (clipPlane)
     {
     case ClipPlane::Left:
@@ -52,29 +55,33 @@ Vector4f Clip::intersect(const Vector4f& a, const Vector4f& b, ClipPlane clipPla
         bValue = b.z + b.w;
         break;
     default:
-        return Vector4f();
+        return Vertex();
     
     }
     t = std::abs(aValue) / std::abs(aValue - bValue);
-    return Vector4f(t * b + (1.0f - t) * a);
+    Vertex result;
+
+    result.position = _a.position * (1.0f - t) + t * _b.position;
+    result.color = _a.color * (1.0f - t) + t * _b.color;
+    return result;
 }
 
-std::vector<Vector4f> Clip::clipSinglePlane (const std::vector<Vector4f>& polygon, ClipPlane clipPlane){
-    std::vector<Vector4f> output;
+std::vector<Vertex> Clip::clipSinglePlane (const std::vector<Vertex>& polygon, ClipPlane clipPlane){
+    std::vector<Vertex> output;
     if(polygon.empty()){
         return output;
     }
-    Vector4f previous = polygon.back();
-    bool previousInside = inside(previous, clipPlane);
+    Vertex previous = polygon.back();
+    bool previousInside = inside(previous.position, clipPlane);
     for(const auto& current : polygon){
-        bool currentInside = inside(current, clipPlane);
+        bool currentInside = inside(current.position, clipPlane);
         if(previousInside && currentInside){
             output.push_back(current);
         }else if(previousInside && !currentInside){
-            Vector4f point = intersect(previous, current, clipPlane);
+            Vertex point = intersect(previous, current, clipPlane);
             output.push_back(point);
         }else if(!previousInside && currentInside){
-            Vector4f point = intersect(current, previous, clipPlane);
+            Vertex point = intersect(current, previous, clipPlane);
             output.push_back(point);
             output.push_back(current);
         }
@@ -84,11 +91,11 @@ std::vector<Vector4f> Clip::clipSinglePlane (const std::vector<Vector4f>& polygo
     return output;
 }
 
-std::vector<Vector4f> Clip::clipTriangle(const Triangles& t){
-    std::vector<Vector4f> output = {
-        t.getV0(),
-        t.getV1(),
-        t.getV2()
+std::vector<Vertex> Clip::clipTriangle(const Triangles& t, bool whetherInterpolate = true){
+    std::vector<Vertex> output = {
+        Vertex(t.getV0(), t.color[0]),
+        Vertex(t.getV1(), t.color[1]),
+        Vertex(t.getV2(), t.color[2])
     };
 
     output = clipSinglePlane(output, ClipPlane::Left);
@@ -98,18 +105,30 @@ std::vector<Vector4f> Clip::clipTriangle(const Triangles& t){
     output = clipSinglePlane(output, ClipPlane::Front);
     output = clipSinglePlane(output, ClipPlane::Back);
 
+    if(!whetherInterpolate && !output.empty()){
+        Vector3f flatColor = t.color[0];
+        for(auto& vertex : output){
+            vertex.color = flatColor;
+        }
+    }
+
     return output;
     
     
 }
 
-std::vector<Triangles> Clip::toTriangleList(const std::vector<Vector4f> polyon){
+std::vector<Triangles> Clip::toTriangleList(const std::vector<Vertex> polyon){
     std::vector<Triangles> output;
     if(polyon.size() < 3){
         return output;
     }
     for(int i = 1; i < polyon.size() - 1; i ++){
-        output.push_back(Triangles(polyon[0], polyon[i], polyon[i + 1]));
+        Triangles t(polyon[0].position, polyon[i].position, polyon[i + 1].position);
+        t.color[0] = polyon[0].color;
+        t.color[1] = polyon[i].color;
+        t.color[2] = polyon[i + 1].color;
+        output.push_back(t);
     }
     return output;
 }
+

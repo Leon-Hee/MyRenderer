@@ -10,8 +10,8 @@
 
 int main()
 {
-    const int width = 800;
-    const int height = 800;
+    constexpr int width = 800;
+    constexpr int height = 800;
 
     Framebuffer framebuffer(width, height);
     Depthbuffer depthbuffer(width, height);
@@ -23,10 +23,13 @@ int main()
     // Projection
     // =========================
 
-    float fov = 60.0f;
-    float aspect = static_cast<float>(width) / height;
-    float zNear = 0.1f;
-    float zFar = 100.0f;
+    constexpr float fov = 60.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
+    const float aspect =
+        static_cast<float>(width) /
+        static_cast<float>(height);
 
     Mat4 projection = perspective(
         fov,
@@ -36,132 +39,117 @@ int main()
     );
 
     // =========================
-    // 1. Front Face
-    // 左下
+    // Model
     // =========================
 
-    Triangles front1(
-        Vector3f(-3.0f, -1.0f, -3.0f),
-        Vector3f(-1.0f, -1.0f, -3.0f),
-        Vector3f(-2.0f,  1.0f, -3.0f)
+    // 放到相机前方
+    Mat4 model =
+        translate(0.0f, 0.0f, -1.0f);
+
+    Mat4 MVP = projection * model;
+
+    // =========================
+    // Triangle
+    //
+    // 让一个顶点非常靠近 Near Plane
+    //
+    // v0: 接近 Near Plane
+    // v1/v2: 正常在视锥体内部
+    //
+    // 这个版本先避免直接让 z 穿过
+    // Near Plane 太极端的位置。
+    // =========================
+
+    Vector3f v0(
+        -0.8f,
+        -0.8f,
+        1.85f
+    );
+
+    Vector3f v1(
+         0.8f,
+        -0.8f,
+        0.0f
+    );
+
+    Vector3f v2(
+         0.0f,
+         0.8f,
+         0.0f
     );
 
     // =========================
-    // 2. Back Face
-    // 反转 1 的 winding
+    // Colors
     // =========================
 
-    /*Triangles back1(
-        Vector3f(1.0f, -1.0f, -3.0f),
-        Vector3f(0.0f,  1.0f, -3.0f),
-        Vector3f(2.0f, -1.0f, -3.0f)
-    );*/
-
-    Triangles back1(
-    Vector3f(1.0f, -1.0f, -3.0f),
-    Vector3f(2.0f, -1.0f, -3.0f),
-    Vector3f(0.0f,  1.0f, -3.0f)
+    Vector3f red(
+        1.0f,
+        0.0f,
+        0.0f
     );
 
+    Vector3f green(
+        0.0f,
+        1.0f,
+        0.0f
+    );
 
-
-    // =========================
-    // 3. Front Face
-    // 右上
-    // =========================
-
-    Triangles front2(
-        Vector3f(1.0f, 1.0f, -3.0f),
-        Vector3f(3.0f, 1.0f, -3.0f),
-        Vector3f(2.0f, 3.0f, -3.0f)
+    Vector3f blue(
+        0.0f,
+        0.0f,
+        1.0f
     );
 
     // =========================
-    // 4. Back Face
+    // Triangle
     // =========================
 
-    Triangles back2(
-        Vector3f(4.0f, 1.0f, -3.0f),
-        Vector3f(5.0f, 3.0f, -3.0f),
-        Vector3f(6.0f, 1.0f, -3.0f)
+    Triangles triangle(
+        v0,
+        v1,
+        v2
     );
 
-    // =========================
-    // 5. Very Thin Triangle
-    // 测试 EPSILON
-    // =========================
-
-    Triangles thin(
-        Vector3f(-3.0f, 3.0f, -3.0f),
-        Vector3f(-1.0f, 3.0f, -3.0f),
-        Vector3f(-2.0f, 3.000001f, -3.0f)
-    );
+    triangle.setColors({
+        red,
+        green,
+        blue
+    });
 
     // =========================
-    // 6. Degenerate Triangle
-    // 三点共线
+    // Debug
     // =========================
 
-    Triangles degenerate(
-        Vector3f(3.0f, -3.0f, -3.0f),
-        Vector3f(4.0f, -2.0f, -3.0f),
-        Vector3f(5.0f, -1.0f, -3.0f)
-    );
+    std::cout
+        << "========== Near Clip Test ==========\n";
+
+    std::cout
+        << "v0 Model: "
+        << v0.x << " "
+        << v0.y << " "
+        << v0.z << "\n";
+
+    std::cout
+        << "v1 Model: "
+        << v1.x << " "
+        << v1.y << " "
+        << v1.z << "\n";
+
+    std::cout
+        << "v2 Model: "
+        << v2.x << " "
+        << v2.y << " "
+        << v2.z << "\n";
 
     // =========================
     // Render
     // =========================
 
     render::RenderTriangles(
-        front1,
+        triangle,
         framebuffer,
         depthbuffer,
-        projection,
-        width,
-        height
-    );
-
-    render::RenderTriangles(
-        back1,
-        framebuffer,
-        depthbuffer,
-        projection,
-        width,
-        height
-    );
-
-    render::RenderTriangles(
-        front2,
-        framebuffer,
-        depthbuffer,
-        projection,
-        width,
-        height
-    );
-
-    render::RenderTriangles(
-        back2,
-        framebuffer,
-        depthbuffer,
-        projection,
-        width,
-        height
-    );
-
-    render::RenderTriangles(
-        thin,
-        framebuffer,
-        depthbuffer,
-        projection,
-        width,
-        height
-    );
-
-    render::RenderTriangles(
-        degenerate,
-        framebuffer,
-        depthbuffer,
-        projection,
+        MVP,
         width,
         height
     );
@@ -170,10 +158,12 @@ int main()
     // Save
     // =========================
 
-    framebuffer.save("culling_test.ppm");
+    framebuffer.save(
+        "near_clip_gradient.ppm"
+    );
 
-    std::cout << "Back-face culling test finished!\n";
-    std::cout << "Output: culling_test.ppm\n";
+    std::cout
+        << "Near clip gradient test finished!\n";
 
     return 0;
 }

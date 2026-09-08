@@ -2,7 +2,7 @@
 #include "Transform/Transform.h"
 #include "Transform/Viewport.h"
 #include "Transform/Clip.h"
-#define EPSILON -0.0005
+#define EPSILON 0.0005
 
 void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4 MVP, int width, int height){
     Triangles tri = t.toVec4T(t);
@@ -14,23 +14,22 @@ void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer
     v2 = MVP * v2;
 
     Triangles clipTri(v0, v1, v2);
-    std::vector<Triangles> clipList = Clip::toTriangleList(Clip::clipTriangle(clipTri));
-    Rasterizer rasterizer;
-    int count = 0;
-    for(const auto& i : clipList){
+    clipTri.setColors({t.color[0], t.color[1], t.color[2]});
 
+    bool whetherInterpolate = false;
+    std::vector<Triangles> clipList = Clip::toTriangleList(Clip::clipTriangle(clipTri, whetherInterpolate));
+    Rasterizer rasterizer;
+    for(auto& i : clipList){
         Vector3f vert0 = Viewport::transform(perspectiveDivide(i.getV0()),width, height);
         Vector3f vert1 = Viewport::transform(perspectiveDivide(i.getV1()), width, height);
         Vector3f vert2 = Viewport::transform(perspectiveDivide(i.getV2()), width, height);
 
         Triangles clippedTri = Triangles(vert0, vert1, vert2);
+        clippedTri.setColors({i.color[0], i.color[1], i.color[2]});
         if(isFront(vert0, vert1, vert2)){
             rasterizer.drawTriangles(clippedTri, framebuffer, depthbuffer);
-            count++;
         }
     }
-    std::cout << "Number of Tirangle: " << clipList.size() << std::endl;
-    std::cout << "Render in real: " << count << std::endl;
     
 
 }

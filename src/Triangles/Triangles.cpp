@@ -61,10 +61,19 @@ void Triangles::setColors(const std::array<Vector3f, 3>& colors){
 Triangles Triangles::toVec4T(const Triangles& t){
     if(t.isVec4){
         return t;
-    }else{
-        Vector4f vt0 = toVec4(t.vert0);
-        Vector4f vt1 = toVec4(t.vert1);
-        Vector4f vt2 = toVec4(t.vert2);
-        return Triangles(vt0, vt1, vt2);
     }
+    Vector4f vt0 = toVec4(t.vert0);
+    Vector4f vt1 = toVec4(t.vert1);
+    Vector4f vt2 = toVec4(t.vert2);
+
+    Triangles result(vt0, vt1, vt2);
+    result.setColors({
+        t.color[0],
+        t.color[1],
+        t.color[2]
+    });
+
+    return result;
+    
 }
+

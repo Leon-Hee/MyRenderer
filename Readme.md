@@ -7,3 +7,5 @@ September 4, 2026: Completed the Rasterizer implementation, including triangle r
 September 5, 2026: Completed the Render function and implemented polygon clipping in clip space.
 
 September 7, 2026: Implemented the front‑back judgment of the triangle.
+
+September 8, 2026: Fix color interpolation bug, refactor Clip.cpp

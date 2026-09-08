@@ -25,6 +25,7 @@ public:
 
     Triangles toVec4T(const Triangles& t);
 
+
     const Vector4f* getList() const;
     const Vector3f* getListVec3() const;
 

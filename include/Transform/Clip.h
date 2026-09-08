@@ -3,6 +3,7 @@
 #include <vector>
 #include "Math/Mat.hpp"
 #include "Triangle/Triangles.h"
+#include "Struction/Vertex.hpp"
 
 namespace Clip{
     enum class ClipPlane {
@@ -16,11 +17,11 @@ namespace Clip{
 
     bool inside(const Vector4f& v, ClipPlane clipPlane);
 
-    Vector4f intersect(const Vector4f& a, const Vector4f& b, ClipPlane clipPlane);
+    Vertex intersect(const Vertex& a, const Vertex& b, ClipPlane clipPlane);
 
-    std::vector<Vector4f> clipSinglePlane (const std::vector<Vector4f>& polygon, ClipPlane clipPlane);
+    std::vector<Vertex> clipSinglePlane (const std::vector<Vertex>& polygon, ClipPlane clipPlane);
 
-    std::vector<Vector4f> clipTriangle(const Triangles& t);
+    std::vector<Vertex> clipTriangle(const Triangles& t, bool whetherInterpolate);
 
-    std::vector<Triangles> toTriangleList(const std::vector<Vector4f> polygon);
+    std::vector<Triangles> toTriangleList(const std::vector<Vertex> polygon);
 }
