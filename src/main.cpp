@@ -42,7 +42,6 @@ int main()
     // Model
     // =========================
 
-    // 放到相机前方
     Mat4 model =
         translate(0.0f, 0.0f, -1.0f);
 
@@ -51,31 +50,28 @@ int main()
     // =========================
     // Triangle
     //
-    // 让一个顶点非常靠近 Near Plane
+    // 两个顶点很近
+    // 一个顶点很远
     //
-    // v0: 接近 Near Plane
-    // v1/v2: 正常在视锥体内部
-    //
-    // 这个版本先避免直接让 z 穿过
-    // Near Plane 太极端的位置。
+    // 产生明显不同的 Clip-Space W
     // =========================
 
     Vector3f v0(
         -0.8f,
         -0.8f,
-        1.85f
+         0.0f
     );
 
     Vector3f v1(
          0.8f,
         -0.8f,
-        0.0f
+         0.0f
     );
 
     Vector3f v2(
          0.0f,
          0.8f,
-         0.0f
+        -8.0f
     );
 
     // =========================
@@ -121,7 +117,7 @@ int main()
     // =========================
 
     std::cout
-        << "========== Near Clip Test ==========\n";
+        << "========== Perspective Interpolation Test ==========\n";
 
     std::cout
         << "v0 Model: "
@@ -159,11 +155,11 @@ int main()
     // =========================
 
     framebuffer.save(
-        "near_clip_gradient.ppm"
+        "perspective_interpolation_1.ppm"
     );
 
     std::cout
-        << "Near clip gradient test finished!\n";
+        << "Perspective interpolation test finished!\n";
 
     return 0;
 }

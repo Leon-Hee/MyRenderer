@@ -1,8 +1,9 @@
 #include "Rasterizer/Rasterizer.h"
 #include <iostream>
 
-static Vector3f interpolate(float alpha, float beta, float gamma, const Vector3f& vert1, const Vector3f& vert2, const Vector3f& vert3, float weight){
-    return (alpha * vert1 + beta * vert2 + gamma * vert3) / weight;
+static Vector3f interpolate(float alpha, float beta, float gamma, const Vector3f& vert1, const Vector3f& vert2, const Vector3f& vert3, float invW0, float invW1, float invW2){
+    float denominator = alpha * invW0 + beta * invW1 + gamma * invW2;
+    return (alpha * vert1 * invW0 + beta * vert2 * invW1 + gamma * vert3 * invW2) / denominator;
 }
 
 void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer) const {
@@ -39,7 +40,9 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
                     triangles.color[0],
                     triangles.color[1],
                     triangles.color[2],
-                    1
+                    triangles.invW[0],
+                    triangles.invW[1],
+                    triangles.invW[2]
                 );
                 framebuffer.setPixel(x, y, color_interpolate);
             }

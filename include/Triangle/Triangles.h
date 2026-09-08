@@ -5,6 +5,7 @@
 class Triangles {
 public:
     Vector3f color[3];
+    float invW[3]{1.0f, 1.0f, 1.0f};
     Triangles();
     Triangles(const Vector4f& v0,
               const Vector4f& v1,
