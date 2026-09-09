@@ -21,10 +21,7 @@ void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer
     v2 = MVP * v2;
 
     Triangles temp = t.tranNormal(t, M, V);
-    std::cout << "Normal before clipping:\n";
-std::cout << temp.normal[0] << '\n';
-std::cout << temp.normal[1] << '\n';
-std::cout << temp.normal[2] << '\n';
+
 
     Triangles clipTri(v0, v1, v2);
     clipTri.setColors({temp.color[0], temp.color[1], temp.color[2]});

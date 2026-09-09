@@ -31,7 +31,7 @@ public:
 
     Vector3f getNormal(int index);
     void setNormal(const Vector3f& normal_1, const Vector3f& normal_2, const Vector3f& normal_3);
-    Triangles tranNormal(const Triangles& t, Mat4 M, Mat4 V);
+    Triangles tranNormal(const Triangles& t, Mat4 M);
 
     const Vector4f* getList() const;
     const Vector3f* getListVec3() const;

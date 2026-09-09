@@ -23,7 +23,8 @@ int main()
     // 1. Material
     // ============================================================
 
-    // 深灰色材质，让白色高光更加明显
+    // 深灰色材质
+    // 用深色材质可以让白色 Specular 高光更加明显
     const Vector3f materialColor(
         0.22f,
         0.22f,
@@ -33,70 +34,72 @@ int main()
     std::vector<Triangles> triangles;
 
     // ============================================================
-    // 2. Icosahedron
+    // 2. Cube vertices
     //
-    // 一个 20 面三角形多面体
-    // 比 Cube 更适合观察 Specular
+    //        7--------6
+    //       /|       /|
+    //      4--------5 |
+    //      | |      | |
+    //      | 3------|-2
+    //      |/       |/
+    //      0--------1
+    //
     // ============================================================
 
-    constexpr float phi = 1.61803398875f;
+    const float s = 1.0f;
 
     std::vector<Vector3f> vertices =
     {
-        // (0, ±1, ±phi)
-        Vector3f(0, -1,  phi),
-        Vector3f(0,  1,  phi),
-        Vector3f(0, -1, -phi),
-        Vector3f(0,  1, -phi),
+        Vector3f(-s, -s, -s), // 0
+        Vector3f( s, -s, -s), // 1
+        Vector3f( s,  s, -s), // 2
+        Vector3f(-s,  s, -s), // 3
 
-        // (±1, ±phi, 0)
-        Vector3f(-1,  phi, 0),
-        Vector3f( 1,  phi, 0),
-        Vector3f(-1, -phi, 0),
-        Vector3f( 1, -phi, 0),
-
-        // (±phi, 0, ±1)
-        Vector3f( phi, 0, -1),
-        Vector3f( phi, 0,  1),
-        Vector3f(-phi, 0, -1),
-        Vector3f(-phi, 0,  1)
+        Vector3f(-s, -s,  s), // 4
+        Vector3f( s, -s,  s), // 5
+        Vector3f( s,  s,  s), // 6
+        Vector3f(-s,  s,  s)  // 7
     };
 
-    // 归一化到单位球面
-    for (auto& v : vertices)
-    {
-        v.normalize();
-    }
-
     // ============================================================
-    // 3. Icosahedron faces
+    // 3. Cube faces
+    //
+    // 每个面由两个三角形组成
+    //
+    // Front  : z = +s
+    // Back   : z = -s
+    // Left   : x = -s
+    // Right  : x = +s
+    // Top    : y = +s
+    // Bottom : y = -s
+    //
     // ============================================================
 
-    const int faces[20][3] =
+    const int faces[12][3] =
     {
-        {0, 11, 5},
-        {0, 5, 1},
-        {0, 1, 7},
-        {0, 7, 10},
-        {0, 10, 11},
+        // Front
+        {4, 5, 6},
+        {4, 6, 7},
 
-        {1, 5, 9},
-        {5, 11, 4},
-        {11, 10, 2},
-        {10, 7, 6},
-        {7, 1, 8},
+        // Back
+        {0, 2, 1},
+        {0, 3, 2},
 
-        {3, 9, 4},
-        {3, 4, 2},
-        {3, 2, 6},
-        {3, 6, 8},
-        {3, 8, 9},
+        // Left
+        {0, 4, 7},
+        {0, 7, 3},
 
-        {4, 9, 5},
-        {2, 4, 11},
-        {6, 2, 10},
-        {8, 6, 7},
-        {9, 8, 1}
+        // Right
+        {1, 2, 6},
+        {1, 6, 5},
+
+        // Top
+        {3, 7, 6},
+        {3, 6, 2},
+
+        // Bottom
+        {0, 1, 5},
+        {0, 5, 4}
     };
 
     // ============================================================
@@ -114,8 +117,7 @@ int main()
         // --------------------------------------------------------
         // Flat normal
         //
-        // 当前先使用面法线。
-        // 这样可以看到明显的多面体结构。
+        // 一个面的两个三角形使用相同的法线
         // --------------------------------------------------------
 
         Vector3f normal =
@@ -145,9 +147,9 @@ int main()
     // ============================================================
 
     Vector3f cameraPos(
-        3.5f,
-        2.5f,
-        5.5f
+        4.0f,
+        3.0f,
+        6.0f
     );
 
     Mat4 V = lookAt(
@@ -181,15 +183,23 @@ int main()
     // 9. Light
     // ============================================================
 
+    // 放在摄像机右上方
+    // 这样比较容易观察 Specular
+    float shininess = 128.0f;
     Light light(
-        Vector3f(3.0f, 4.0f, 2.0f),
+        Vector3f(-1.0f, 2.0f, 2.0f),
         Vector3f(1.0f, 1.0f, 1.0f),
-        1.0f,      // intensity
-        0.03f      // ambient
+        3.0f,      // intensity
+        0.3f,      // ambient
+        shininess
     );
 
-    // 比 8 更集中，比 64 更容易看到
-    light.shininess = 32.0f;
+    // Blinn-Phong shininess
+    //
+    // 8   -> 高光很宽
+    // 32  -> 比较明显
+    // 64  -> 更集中
+    // 128 -> 非常集中
 
     // ============================================================
     // 10. Render
@@ -215,11 +225,11 @@ int main()
     // 11. Save
     // ============================================================
 
-    framebuffer.save("polyhedron_specular_test.ppm");
+    framebuffer.save("cube_specular_test.ppm");
 
     std::cout << "====================================\n";
-    std::cout << "Polyhedron Blinn-Phong test finished.\n";
-    std::cout << "Saved: polyhedron_specular_test.ppm\n";
+    std::cout << "Cube Blinn-Phong test finished.\n";
+    std::cout << "Saved: cube_specular_test.ppm\n";
     std::cout << "====================================\n";
 
     return 0;

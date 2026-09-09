@@ -9,7 +9,7 @@ public:
     float ambient_intensity;
     float intensity;
     float shininess;
-    Light(const Vector3f& _position, const Vector3f& _color, const float _intensity, const float _ambient_intensity) : position(_position), color(_color), intensity(_intensity), ambient_intensity(_ambient_intensity){}
+    Light(const Vector3f& _position, const Vector3f& _color, const float _intensity, const float _ambient_intensity, float _shininess) : position(_position), color(_color), intensity(_intensity), ambient_intensity(_ambient_intensity), shininess(_shininess){}
     enum class Type{
         Ambient,
         Diffuse,

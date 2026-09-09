@@ -87,9 +87,8 @@ void Triangles::setNormal(const Vector3f& normal_1, const Vector3f& normal_2, co
     normal[2] = (normal_3);
 }
 
-Triangles Triangles::tranNormal(const Triangles& t, Mat4 M, Mat4 V){
-    Mat4 ModelView = M;
-    Mat4 normalMatrix = ModelView.inverse().transpose();
+Triangles Triangles::tranNormal(const Triangles& t, Mat4 M){
+    Mat4 normalMatrix = M.inverse().transpose();
     Triangles result = t;
     for(int i = 0; i < 3; i++){
         Vector4f nor(
