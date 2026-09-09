@@ -2,19 +2,37 @@
 #include "Transform/Transform.h"
 #include "Transform/Viewport.h"
 #include "Transform/Clip.h"
+
 #define EPSILON 0.0005
 
-void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4 MVP, int width, int height){
+void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4& MVP, int width, int height, const Mat4& M, const Mat4& V, const Light& light, const Vector3f& cameraPos){
     Triangles tri = t.toVec4T(t);
     Vector4f v0 = tri.getV0();
     Vector4f v1 = tri.getV1();
     Vector4f v2 = tri.getV2();
+    Vector4f world0 = M * v0;
+    Vector4f world1 = M * v1;
+    Vector4f world2 = M * v2;
+    Vector3f worldPos0(world0.x, world0.y, world0.z);
+    Vector3f worldPos1(world1.x, world1.y, world1.z);
+    Vector3f worldPos2(world2.x, world2.y, world2.z);
     v0 = MVP * v0;
     v1 = MVP * v1;
     v2 = MVP * v2;
 
+    Triangles temp = t.tranNormal(t, M, V);
+    std::cout << "Normal before clipping:\n";
+std::cout << temp.normal[0] << '\n';
+std::cout << temp.normal[1] << '\n';
+std::cout << temp.normal[2] << '\n';
+
     Triangles clipTri(v0, v1, v2);
-    clipTri.setColors({t.color[0], t.color[1], t.color[2]});
+    clipTri.setColors({temp.color[0], temp.color[1], temp.color[2]});
+    clipTri.setNormal(temp.normal[0], temp.normal[1], temp.normal[2]);
+
+    clipTri.position[0] = worldPos0;
+    clipTri.position[1] = worldPos1;
+    clipTri.position[2] = worldPos2;
 
     bool whetherInterpolate = true;
     std::vector<Triangles> clipList = Clip::toTriangleList(Clip::clipTriangle(clipTri, whetherInterpolate));
@@ -32,9 +50,15 @@ void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer
         clippedTri.invW[0] = 1.0f / clip0.w;
         clippedTri.invW[1] = 1.0f / clip1.w;
         clippedTri.invW[2] = 1.0f / clip2.w;
-        
+
+        clippedTri.setNormal(i.normal[0], i.normal[1], i.normal[2]);
+        clippedTri.position[0] = i.position[0];
+        clippedTri.position[1] = i.position[1];
+        clippedTri.position[2] = i.position[2];
+
+
         if(isFront(vert0, vert1, vert2)){
-            rasterizer.drawTriangles(clippedTri, framebuffer, depthbuffer);
+            rasterizer.drawTriangles(clippedTri, framebuffer, depthbuffer, light, cameraPos);
         }
     }
     

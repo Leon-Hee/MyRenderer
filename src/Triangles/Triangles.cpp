@@ -77,3 +77,29 @@ Triangles Triangles::toVec4T(const Triangles& t){
     
 }
 
+Vector3f Triangles::getNormal(int index){
+    return normal[index];
+}
+
+void Triangles::setNormal(const Vector3f& normal_1, const Vector3f& normal_2, const Vector3f& normal_3){
+    normal[0] = (normal_1);
+    normal[1] = (normal_2);
+    normal[2] = (normal_3);
+}
+
+Triangles Triangles::tranNormal(const Triangles& t, Mat4 M, Mat4 V){
+    Mat4 ModelView = M;
+    Mat4 normalMatrix = ModelView.inverse().transpose();
+    Triangles result = t;
+    for(int i = 0; i < 3; i++){
+        Vector4f nor(
+            t.normal[i].x,
+            t.normal[i].y,
+            t.normal[i].z,
+            0.0f
+        );
+        Vector4f transformed = normalMatrix * nor;
+        result.normal[i] = Vector3f(transformed.x, transformed.y, transformed.z).normalize();
+    }
+    return result;
+}

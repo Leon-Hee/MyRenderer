@@ -17,6 +17,9 @@ add_executable(
     src/Transform/Viewport.cpp
     src/Render/Render.cpp
     src/Transform/Clip.cpp
+    src/Shader/Fragment.cpp
+    src/Shader/Light.cpp
+    src/Shader/Shading.cpp
 )
 
 target_include_directories(

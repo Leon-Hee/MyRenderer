@@ -1,4 +1,6 @@
 #include "Rasterizer/Rasterizer.h"
+#include "Shader/Fragment.h"
+#include "Shader/Shading.h"
 #include <iostream>
 
 static Vector3f interpolate(float alpha, float beta, float gamma, const Vector3f& vert1, const Vector3f& vert2, const Vector3f& vert3, float invW0, float invW1, float invW2){
@@ -6,7 +8,12 @@ static Vector3f interpolate(float alpha, float beta, float gamma, const Vector3f
     return (alpha * vert1 * invW0 + beta * vert2 * invW1 + gamma * vert3 * invW2) / denominator;
 }
 
-void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer) const {
+static float interpolate(float alpha, float beta, float gamma, float Var1, float Var2, float Var3, float invW0, float invW1, float invW2){
+    float denominator = alpha * invW0 + beta * invW1 + gamma * invW2;
+    return (alpha * invW0 * Var1 + beta * invW1 * Var2 + gamma * invW2 * Var3) / denominator;
+}
+
+void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Light& light, const Vector3f& cameraPos) const {
     const Vector3f* vertices = triangles.getListVec3();
     int width = framebuffer.getWidth();
     int height = framebuffer.getHeight();
@@ -28,8 +35,8 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
                 continue;
             }
             auto[alpha, beta, gamma] = barycentric(pixel_x, pixel_y, triangles);
-
-            float zp = alpha * vertices[0].z + beta * vertices[1].z + gamma * vertices[2].z;
+            float zp = interpolate(alpha, beta, gamma, vertices[0].z, vertices[1].z, vertices[2].z, triangles.invW[0], triangles.invW[1], triangles.invW[2]);
+            
             float oldDepth = depthbuffer.getDepthBuffer(x, y);
             if (oldDepth > zp) {
                 depthbuffer.setDepthBuffer(x, y, zp);
@@ -44,7 +51,52 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
                     triangles.invW[1],
                     triangles.invW[2]
                 );
-                framebuffer.setPixel(x, y, color_interpolate);
+                Vector3f normal_interpolate = interpolate(
+                    alpha,
+                    beta,
+                    gamma,
+                    triangles.normal[0],
+                    triangles.normal[1],
+                    triangles.normal[2],
+                    triangles.invW[0],
+                    triangles.invW[1],
+                    triangles.invW[2]
+                ).normalize();
+                Vector3f position_interpolate = interpolate(
+                    alpha,
+                    beta,
+                    gamma,
+                    triangles.position[0],
+                    triangles.position[1],
+                    triangles.position[2],
+                    triangles.invW[0],
+                    triangles.invW[1],
+                    triangles.invW[2]
+                );
+
+                Fragment fragment(position_interpolate, normal_interpolate, color_interpolate, cameraPos);
+                Shading shader;
+                Vector3f ambient = shader.shade(
+                    fragment,
+                    light,
+                    Light::Type::Ambient
+                );
+
+                Vector3f diffuse = shader.shade(
+                    fragment,
+                    light,
+                    Light::Type::Diffuse
+                );
+
+                Vector3f specular = shader.shade(
+                    fragment,
+                    light,
+                    Light::Type::Specular
+                );
+
+                Vector3f end_color = ambient + diffuse + specular;
+
+                framebuffer.setPixel(x, y, end_color);
             }
         }
     }

@@ -1,10 +1,13 @@
 #pragma once
 
 #include "Math/Vector.hpp"
+#include "Math/Mat.hpp"
 
 class Triangles {
 public:
     Vector3f color[3];
+    Vector3f normal[3];
+    Vector3f position[3];//World Space
     float invW[3]{1.0f, 1.0f, 1.0f};
     Triangles();
     Triangles(const Vector4f& v0,
@@ -26,6 +29,9 @@ public:
 
     Triangles toVec4T(const Triangles& t);
 
+    Vector3f getNormal(int index);
+    void setNormal(const Vector3f& normal_1, const Vector3f& normal_2, const Vector3f& normal_3);
+    Triangles tranNormal(const Triangles& t, Mat4 M, Mat4 V);
 
     const Vector4f* getList() const;
     const Vector3f* getListVec3() const;

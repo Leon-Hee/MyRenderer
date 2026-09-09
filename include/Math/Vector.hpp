@@ -51,6 +51,7 @@ public:
     Vector3f& operator+=(const Vector3f& v){x += v.x; y += v.y; z += v.z; return *this;};
     Vector3f normalized() const;
     Vector3f& normalize();
+    Vector3f operator*(const Vector3f& v) const{return Vector3f(x * v.x, y * v.y, z * v.z);}
 };
 class Vector4f {
 public:
