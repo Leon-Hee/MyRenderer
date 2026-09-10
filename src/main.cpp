@@ -1,22 +1,23 @@
 #include <iostream>
+#include <vector>
+
+#include "objLoader/objLoader.h"
 
 #include "Render/Render.h"
 #include "Framebuffer/Framebuffer.h"
 #include "DepthBuffer/Depthbuffer.h"
-#include "Triangle/Triangles.h"
 #include "Transform/Transform.h"
 #include "Shader/Light.h"
 #include "Shader/Material.h"
-#include "Texture/Texture.h"
 
 int main()
 {
+    // =========================
+    // 1. Framebuffer / Depthbuffer
+    // =========================
+
     const int width = 800;
     const int height = 800;
-
-    // =========================
-    // Framebuffer / Depthbuffer
-    // =========================
 
     Framebuffer framebuffer(width, height);
     Depthbuffer depthbuffer(width, height);
@@ -29,10 +30,28 @@ int main()
 
 
     // =========================
-    // Camera
+    // 2. Load OBJ
     // =========================
 
-    Vector3f cameraPos(0.0f, 0.0f, 5.0f);
+    std::vector<Triangles> model =
+        OBJLoader::load(
+            "obj/african_head/african_head.obj"
+        );
+
+    std::cout << "Loaded triangles: "
+              << model.size()
+              << std::endl;
+
+
+    // =========================
+    // 3. Model / View / Projection
+    // =========================
+
+    Vector3f cameraPos(
+        0.0f,
+        0.0f,
+        3.0f
+    );
 
     Mat4 M = Mat4::Identity();
 
@@ -53,7 +72,7 @@ int main()
 
 
     // =========================
-    // Light
+    // 4. Light
     // =========================
 
     Light light(
@@ -61,159 +80,70 @@ int main()
         Vector3f(1.0f, 1.0f, 1.0f),
         1.0f,
         0.2f,
-        8.0f
+        32.0f
     );
 
-    light.ambient_intensity = 0.12f;
+    light.ambient_intensity = 0.1f;
 
 
     // =========================
-    // Texture
+    // 5. Material
     // =========================
 
-    Texture containerTexture(
-        "assets/container.jpg"
-    );
+    Texture texture(
+    "obj/african_head/african_head_diffuse.tga"
+);
 
+Material material;
 
-    // =========================
-    // Rough Material
-    // =========================
+material.diffuseColor = Vector3f(
+    1.0f,
+    1.0f,
+    1.0f
+);
 
-    Material material;
+material.specularColor = Vector3f(
+    0.2f,
+    0.2f,
+    0.2f
+);
 
-    material.diffuseColor = Vector3f(
-        1.0f,
-        1.0f,
-        1.0f
-    );
+material.shininess = 16.0f;
 
-    // 较暗的镜面反射
-    material.specularColor = Vector3f(
-        0.15f,
-        0.15f,
-        0.15f
-    );
-
-    // 越低越粗糙，高光越宽
-    material.shininess = 8.0f;
-
-    material.diffuseTexture = &containerTexture;
+material.diffuseTexture = &texture;
 
 
     // =========================
-    // Front Face
+    // 6. Render
     // =========================
 
-    const float s = 1.0f;
-
-    Vector3f normal(
-        0.0f,
-        0.0f,
-        1.0f
-    );
-
-
-    // =========================
-    // Triangle 1
-    // =========================
-
-    Triangles t1(
-        Vector4f(-s, -s, s, 1.0f),
-        Vector4f( s, -s, s, 1.0f),
-        Vector4f( s,  s, s, 1.0f)
-    );
-
-    t1.setColors({
-        Vector3f(1.0f, 1.0f, 1.0f),
-        Vector3f(1.0f, 1.0f, 1.0f),
-        Vector3f(1.0f, 1.0f, 1.0f)
-    });
-
-    t1.setNormal(
-        normal,
-        normal,
-        normal
-    );
-
-    t1.setUV(
-        Vector2f(0.0f, 0.0f),
-        Vector2f(1.0f, 0.0f),
-        Vector2f(1.0f, 1.0f)
-    );
+    for (Triangles& triangle : model)
+    {
+        render::RenderTriangles(
+            triangle,
+            framebuffer,
+            depthbuffer,
+            MVP,
+            width,
+            height,
+            M,
+            V,
+            light,
+            cameraPos,
+            material
+        );
+    }
 
 
     // =========================
-    // Triangle 2
-    // =========================
-
-    Triangles t2(
-        Vector4f(-s, -s, s, 1.0f),
-        Vector4f( s,  s, s, 1.0f),
-        Vector4f(-s,  s, s, 1.0f)
-    );
-
-    t2.setColors({
-        Vector3f(1.0f, 1.0f, 1.0f),
-        Vector3f(1.0f, 1.0f, 1.0f),
-        Vector3f(1.0f, 1.0f, 1.0f)
-    });
-
-    t2.setNormal(
-        normal,
-        normal,
-        normal
-    );
-
-    t2.setUV(
-        Vector2f(0.0f, 0.0f),
-        Vector2f(1.0f, 1.0f),
-        Vector2f(0.0f, 1.0f)
-    );
-
-
-    // =========================
-    // Render
-    // =========================
-
-    render::RenderTriangles(
-        t1,
-        framebuffer,
-        depthbuffer,
-        MVP,
-        width,
-        height,
-        M,
-        V,
-        light,
-        cameraPos,
-        material
-    );
-
-    render::RenderTriangles(
-        t2,
-        framebuffer,
-        depthbuffer,
-        MVP,
-        width,
-        height,
-        M,
-        V,
-        light,
-        cameraPos,
-        material
-    );
-
-
-    // =========================
-    // Save
+    // 7. Save
     // =========================
 
     framebuffer.save(
-        "rough_material_test.ppm"
+        "african_head_test.ppm"
     );
 
-    std::cout << "Rough material test finished."
+    std::cout << "African head render finished."
               << std::endl;
 
     return 0;

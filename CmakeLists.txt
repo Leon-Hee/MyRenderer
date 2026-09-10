@@ -21,6 +21,7 @@ add_executable(
     src/Shader/Light.cpp
     src/Shader/Shading.cpp
     src/Texture/Texture.cpp
+    src/objLoader/objLoader.cpp
 )
 
 target_include_directories(
