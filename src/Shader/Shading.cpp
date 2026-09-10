@@ -1,7 +1,7 @@
 #include "Shader/Shading.h"
 #include <algorithm>
 
-Vector3f Shading::shade(const Fragment& fragment, const Light& light, Light::Type lightType){
+Vector3f Shading::shade(const Fragment& fragment, const Light& light, const Material& material, Light::Type lightType){
     if(lightType == Light::Type::Ambient){
         return fragment.color * light.ambient_intensity * light.color;
     }else if(lightType == Light::Type::Diffuse){
@@ -20,8 +20,8 @@ Vector3f Shading::shade(const Fragment& fragment, const Light& light, Light::Typ
         Vector3f normal = fragment.normal;
         normal.normalize();
         Vector3f half = (lightPos + viewPos).normalize();
-        float specular = std::pow(std::max(0.0f, dotProduct(half, normal)), light.shininess);
-        return light.intensity * specular * light.color;
+        float specular = std::pow(std::max(0.0f, dotProduct(half, normal)), material.shininess);
+        return light.intensity * specular * light.color * material.specularColor;
     }
     return Vector3f(0.0f, 0.0f, 0.0f);
 }

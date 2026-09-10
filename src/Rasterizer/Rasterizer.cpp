@@ -18,7 +18,7 @@ static Vector2f interpolate(float alpha, float beta, float gamma, const Vector2f
     return (alpha * uv0 * invW0 + beta * uv1 * invW1 + gamma * uv2 * invW2) / denominator;
 }
 
-void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Light& light, const Vector3f& cameraPos, const Texture& texture) const {
+void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Light& light, const Vector3f& cameraPos, const Material& material) const {
     const Vector3f* vertices = triangles.getListVec3();
     int width = framebuffer.getWidth();
     int height = framebuffer.getHeight();
@@ -91,25 +91,34 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
                     triangles.invW[2]
                 );
 
-                Vector3f textureColor = texture.sample(uv_interpolate);
+                Vector3f textureColor;
+
+                if (material.diffuseTexture != nullptr) {
+                    textureColor = material.diffuseTexture->sample(uv_interpolate);
+                } else {
+                    textureColor = material.diffuseColor;
+                }
 
                 Fragment fragment(position_interpolate, normal_interpolate, textureColor, cameraPos, uv_interpolate);
                 Shading shader;
                 Vector3f ambient = shader.shade(
                     fragment,
                     light,
+                    material,
                     Light::Type::Ambient
                 );
 
                 Vector3f diffuse = shader.shade(
                     fragment,
                     light,
+                    material,
                     Light::Type::Diffuse
                 );
 
                 Vector3f specular = shader.shade(
                     fragment,
                     light,
+                    material,
                     Light::Type::Specular
                 );
 

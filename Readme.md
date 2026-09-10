@@ -12,4 +12,4 @@ September 8, 2026: Fix color interpolation bug, refactor Clip.cpp.
 
 September 9, 2026: Implement lighting system and shading system.
 
-September 10, 2026: Achieve Texture Mapping.
+September 10, 2026: Achieve Texture Mapping and Material.

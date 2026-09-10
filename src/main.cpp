@@ -6,16 +6,17 @@
 #include "Triangle/Triangles.h"
 #include "Transform/Transform.h"
 #include "Shader/Light.h"
+#include "Shader/Material.h"
 #include "Texture/Texture.h"
 
 int main()
 {
-    // =========================
-    // 1. Framebuffer / Depthbuffer
-    // =========================
-
     const int width = 800;
     const int height = 800;
+
+    // =========================
+    // Framebuffer / Depthbuffer
+    // =========================
 
     Framebuffer framebuffer(width, height);
     Depthbuffer depthbuffer(width, height);
@@ -28,7 +29,7 @@ int main()
 
 
     // =========================
-    // 2. Model / View / Projection
+    // Camera
     // =========================
 
     Vector3f cameraPos(0.0f, 0.0f, 5.0f);
@@ -52,7 +53,7 @@ int main()
 
 
     // =========================
-    // 3. Light
+    // Light
     // =========================
 
     Light light(
@@ -60,33 +61,62 @@ int main()
         Vector3f(1.0f, 1.0f, 1.0f),
         1.0f,
         0.2f,
-        32
+        8.0f
     );
 
-    light.ambient_intensity = 0.1f;
-    light.shininess = 32.0f;
+    light.ambient_intensity = 0.12f;
 
 
     // =========================
-    // 4. Texture
+    // Texture
     // =========================
 
-    Texture containerTexture("assets/container.jpg");
-    Texture smileTexture("assets/smile.png");
+    Texture containerTexture(
+        "assets/container.jpg"
+    );
 
 
     // =========================
-    // 5. Same Front Face
+    // Rough Material
+    // =========================
+
+    Material material;
+
+    material.diffuseColor = Vector3f(
+        1.0f,
+        1.0f,
+        1.0f
+    );
+
+    // 较暗的镜面反射
+    material.specularColor = Vector3f(
+        0.15f,
+        0.15f,
+        0.15f
+    );
+
+    // 越低越粗糙，高光越宽
+    material.shininess = 8.0f;
+
+    material.diffuseTexture = &containerTexture;
+
+
+    // =========================
+    // Front Face
     // =========================
 
     const float s = 1.0f;
 
-    Vector3f normal(0.0f, 0.0f, 1.0f);
+    Vector3f normal(
+        0.0f,
+        0.0f,
+        1.0f
+    );
 
 
-    // =========================================================
+    // =========================
     // Triangle 1
-    // =========================================================
+    // =========================
 
     Triangles t1(
         Vector4f(-s, -s, s, 1.0f),
@@ -100,7 +130,11 @@ int main()
         Vector3f(1.0f, 1.0f, 1.0f)
     });
 
-    t1.setNormal(normal, normal, normal);
+    t1.setNormal(
+        normal,
+        normal,
+        normal
+    );
 
     t1.setUV(
         Vector2f(0.0f, 0.0f),
@@ -109,9 +143,9 @@ int main()
     );
 
 
-    // =========================================================
+    // =========================
     // Triangle 2
-    // =========================================================
+    // =========================
 
     Triangles t2(
         Vector4f(-s, -s, s, 1.0f),
@@ -125,7 +159,11 @@ int main()
         Vector3f(1.0f, 1.0f, 1.0f)
     });
 
-    t2.setNormal(normal, normal, normal);
+    t2.setNormal(
+        normal,
+        normal,
+        normal
+    );
 
     t2.setUV(
         Vector2f(0.0f, 0.0f),
@@ -134,9 +172,9 @@ int main()
     );
 
 
-    // =========================================================
-    // 第一次：Container
-    // =========================================================
+    // =========================
+    // Render
+    // =========================
 
     render::RenderTriangles(
         t1,
@@ -149,7 +187,7 @@ int main()
         V,
         light,
         cameraPos,
-        containerTexture
+        material
     );
 
     render::RenderTriangles(
@@ -163,50 +201,19 @@ int main()
         V,
         light,
         cameraPos,
-        containerTexture
-    );
-
-    depthbuffer.clear();
-    // =========================================================
-    // 第二次：Smile
-    // =========================================================
-
-    render::RenderTriangles(
-        t1,
-        framebuffer,
-        depthbuffer,
-        MVP,
-        width,
-        height,
-        M,
-        V,
-        light,
-        cameraPos,
-        smileTexture
-    );
-
-    render::RenderTriangles(
-        t2,
-        framebuffer,
-        depthbuffer,
-        MVP,
-        width,
-        height,
-        M,
-        V,
-        light,
-        cameraPos,
-        smileTexture
+        material
     );
 
 
     // =========================
-    // 6. Save
+    // Save
     // =========================
 
-    framebuffer.save("same_face_two_texture_test.ppm");
+    framebuffer.save(
+        "rough_material_test.ppm"
+    );
 
-    std::cout << "Same face two texture test finished."
+    std::cout << "Rough material test finished."
               << std::endl;
 
     return 0;

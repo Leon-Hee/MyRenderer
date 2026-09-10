@@ -5,7 +5,7 @@
 
 #define EPSILON 0.0005
 
-void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4& MVP, int width, int height, const Mat4& M, const Mat4& V, const Light& light, const Vector3f& cameraPos, const Texture& texture){
+void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4& MVP, int width, int height, const Mat4& M, const Mat4& V, const Light& light, const Vector3f& cameraPos, const Material& material){
     Triangles tri = t.toVec4T(t);
     Vector4f v0 = tri.getV0();
     Vector4f v1 = tri.getV1();
@@ -57,7 +57,7 @@ void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer
 
 
         if(isFront(vert0, vert1, vert2)){
-            rasterizer.drawTriangles(clippedTri, framebuffer, depthbuffer, light, cameraPos, texture);
+            rasterizer.drawTriangles(clippedTri, framebuffer, depthbuffer, light, cameraPos, material);
         }
     }
     
