@@ -5,7 +5,7 @@
 
 #define EPSILON 0.0005
 
-void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4& MVP, int width, int height, const Mat4& M, const Mat4& V, const Light& light, const Vector3f& cameraPos){
+void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4& MVP, int width, int height, const Mat4& M, const Mat4& V, const Light& light, const Vector3f& cameraPos, const Texture& texture){
     Triangles tri = t.toVec4T(t);
     Vector4f v0 = tri.getV0();
     Vector4f v1 = tri.getV1();
@@ -20,7 +20,7 @@ void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer
     v1 = MVP * v1;
     v2 = MVP * v2;
 
-    Triangles temp = t.tranNormal(t, M, V);
+    Triangles temp = t.tranNormal(t, M);
 
 
     Triangles clipTri(v0, v1, v2);
@@ -30,6 +30,7 @@ void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer
     clipTri.position[0] = worldPos0;
     clipTri.position[1] = worldPos1;
     clipTri.position[2] = worldPos2;
+    clipTri.setUV(t.uv[0], t.uv[1], t.uv[2]);
 
     bool whetherInterpolate = true;
     std::vector<Triangles> clipList = Clip::toTriangleList(Clip::clipTriangle(clipTri, whetherInterpolate));
@@ -52,10 +53,11 @@ void render::RenderTriangles(Triangles& t, Framebuffer& framebuffer, Depthbuffer
         clippedTri.position[0] = i.position[0];
         clippedTri.position[1] = i.position[1];
         clippedTri.position[2] = i.position[2];
+        clippedTri.setUV(i.uv[0], i.uv[1], i.uv[2]);
 
 
         if(isFront(vert0, vert1, vert2)){
-            rasterizer.drawTriangles(clippedTri, framebuffer, depthbuffer, light, cameraPos);
+            rasterizer.drawTriangles(clippedTri, framebuffer, depthbuffer, light, cameraPos, texture);
         }
     }
     

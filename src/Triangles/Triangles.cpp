@@ -102,3 +102,13 @@ Triangles Triangles::tranNormal(const Triangles& t, Mat4 M){
     }
     return result;
 }
+
+void Triangles::setUV(const Vector2f& uv0, const Vector2f& uv1, const Vector2f& uv2){
+    uv[0] = uv0;
+    uv[1] = uv1;
+    uv[2] = uv2;
+}
+
+Vector2f Triangles::getUV(int index){
+    return uv[index];
+}

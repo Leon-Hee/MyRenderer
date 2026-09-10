@@ -11,3 +11,5 @@ September 7, 2026: Implemented the front‑back judgment of the triangle.
 September 8, 2026: Fix color interpolation bug, refactor Clip.cpp.
 
 September 9, 2026: Implement lighting system and shading system.
+
+September 10, 2026: Achieve Texture Mapping.

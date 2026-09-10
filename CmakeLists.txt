@@ -20,6 +20,7 @@ add_executable(
     src/Shader/Fragment.cpp
     src/Shader/Light.cpp
     src/Shader/Shading.cpp
+    src/Texture/Texture.cpp
 )
 
 target_include_directories(

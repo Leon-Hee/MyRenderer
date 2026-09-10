@@ -13,7 +13,12 @@ static float interpolate(float alpha, float beta, float gamma, float Var1, float
     return (alpha * invW0 * Var1 + beta * invW1 * Var2 + gamma * invW2 * Var3) / denominator;
 }
 
-void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Light& light, const Vector3f& cameraPos) const {
+static Vector2f interpolate(float alpha, float beta, float gamma, const Vector2f& uv0, const Vector2f& uv1, const Vector2f& uv2, float invW0, float invW1, float invW2){
+    float denominator = alpha * invW0 + beta * invW1 + gamma * invW2;
+    return (alpha * uv0 * invW0 + beta * uv1 * invW1 + gamma * uv2 * invW2) / denominator;
+}
+
+void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Light& light, const Vector3f& cameraPos, const Texture& texture) const {
     const Vector3f* vertices = triangles.getListVec3();
     int width = framebuffer.getWidth();
     int height = framebuffer.getHeight();
@@ -73,8 +78,22 @@ void Rasterizer::drawTriangles(const Triangles& triangles, Framebuffer& framebuf
                     triangles.invW[1],
                     triangles.invW[2]
                 );
+                
+                Vector2f uv_interpolate = interpolate(
+                    alpha,
+                    beta,
+                    gamma,
+                    triangles.uv[0],
+                    triangles.uv[1],
+                    triangles.uv[2],
+                    triangles.invW[0],
+                    triangles.invW[1],
+                    triangles.invW[2]
+                );
 
-                Fragment fragment(position_interpolate, normal_interpolate, color_interpolate, cameraPos);
+                Vector3f textureColor = texture.sample(uv_interpolate);
+
+                Fragment fragment(position_interpolate, normal_interpolate, textureColor, cameraPos, uv_interpolate);
                 Shading shader;
                 Vector3f ambient = shader.shade(
                     fragment,

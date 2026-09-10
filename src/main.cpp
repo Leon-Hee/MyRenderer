@@ -1,156 +1,39 @@
 #include <iostream>
-#include <vector>
-#include <cmath>
 
 #include "Render/Render.h"
 #include "Framebuffer/Framebuffer.h"
 #include "DepthBuffer/Depthbuffer.h"
 #include "Triangle/Triangles.h"
-#include "Math/Vector.hpp"
-#include "Math/Mat.hpp"
 #include "Transform/Transform.h"
 #include "Shader/Light.h"
+#include "Texture/Texture.h"
 
 int main()
 {
-    constexpr int width = 800;
-    constexpr int height = 800;
+    // =========================
+    // 1. Framebuffer / Depthbuffer
+    // =========================
+
+    const int width = 800;
+    const int height = 800;
 
     Framebuffer framebuffer(width, height);
     Depthbuffer depthbuffer(width, height);
 
-    // ============================================================
-    // 1. Material
-    // ============================================================
-
-    // 深灰色材质
-    // 用深色材质可以让白色 Specular 高光更加明显
-    const Vector3f materialColor(
-        0.22f,
-        0.22f,
-        0.22f
+    framebuffer.clear(
+        Vector3f(0.05f, 0.05f, 0.05f)
     );
 
-    std::vector<Triangles> triangles;
+    depthbuffer.clear();
 
-    // ============================================================
-    // 2. Cube vertices
-    //
-    //        7--------6
-    //       /|       /|
-    //      4--------5 |
-    //      | |      | |
-    //      | 3------|-2
-    //      |/       |/
-    //      0--------1
-    //
-    // ============================================================
 
-    const float s = 1.0f;
+    // =========================
+    // 2. Model / View / Projection
+    // =========================
 
-    std::vector<Vector3f> vertices =
-    {
-        Vector3f(-s, -s, -s), // 0
-        Vector3f( s, -s, -s), // 1
-        Vector3f( s,  s, -s), // 2
-        Vector3f(-s,  s, -s), // 3
-
-        Vector3f(-s, -s,  s), // 4
-        Vector3f( s, -s,  s), // 5
-        Vector3f( s,  s,  s), // 6
-        Vector3f(-s,  s,  s)  // 7
-    };
-
-    // ============================================================
-    // 3. Cube faces
-    //
-    // 每个面由两个三角形组成
-    //
-    // Front  : z = +s
-    // Back   : z = -s
-    // Left   : x = -s
-    // Right  : x = +s
-    // Top    : y = +s
-    // Bottom : y = -s
-    //
-    // ============================================================
-
-    const int faces[12][3] =
-    {
-        // Front
-        {4, 5, 6},
-        {4, 6, 7},
-
-        // Back
-        {0, 2, 1},
-        {0, 3, 2},
-
-        // Left
-        {0, 4, 7},
-        {0, 7, 3},
-
-        // Right
-        {1, 2, 6},
-        {1, 6, 5},
-
-        // Top
-        {3, 7, 6},
-        {3, 6, 2},
-
-        // Bottom
-        {0, 1, 5},
-        {0, 5, 4}
-    };
-
-    // ============================================================
-    // 4. Create triangles
-    // ============================================================
-
-    for (const auto& face : faces)
-    {
-        Vector3f v0 = vertices[face[0]];
-        Vector3f v1 = vertices[face[1]];
-        Vector3f v2 = vertices[face[2]];
-
-        triangles.emplace_back(v0, v1, v2);
-
-        // --------------------------------------------------------
-        // Flat normal
-        //
-        // 一个面的两个三角形使用相同的法线
-        // --------------------------------------------------------
-
-        Vector3f normal =
-            crossProduct(v1 - v0, v2 - v0).normalized();
-
-        triangles.back().setNormal(
-            normal,
-            normal,
-            normal
-        );
-
-        triangles.back().setColors({
-            materialColor,
-            materialColor,
-            materialColor
-        });
-    }
-
-    // ============================================================
-    // 5. Model
-    // ============================================================
+    Vector3f cameraPos(0.0f, 0.0f, 5.0f);
 
     Mat4 M = Mat4::Identity();
-
-    // ============================================================
-    // 6. Camera
-    // ============================================================
-
-    Vector3f cameraPos(
-        4.0f,
-        3.0f,
-        6.0f
-    );
 
     Mat4 V = lookAt(
         cameraPos,
@@ -158,79 +41,173 @@ int main()
         Vector3f(0.0f, 1.0f, 0.0f)
     );
 
-    // ============================================================
-    // 7. Projection
-    // ============================================================
-
     Mat4 P = perspective(
-        45.0f,
+        60.0f,
         static_cast<float>(width) / height,
         0.1f,
         100.0f
     );
 
-    // ============================================================
-    // 8. MVP
-    // ============================================================
+    Mat4 MVP = P * V * M;
 
-    Mat4 MVP = getMVP(
+
+    // =========================
+    // 3. Light
+    // =========================
+
+    Light light(
+        Vector3f(3.0f, 4.0f, 3.0f),
+        Vector3f(1.0f, 1.0f, 1.0f),
+        1.0f,
+        0.2f,
+        32
+    );
+
+    light.ambient_intensity = 0.1f;
+    light.shininess = 32.0f;
+
+
+    // =========================
+    // 4. Texture
+    // =========================
+
+    Texture containerTexture("assets/container.jpg");
+    Texture smileTexture("assets/smile.png");
+
+
+    // =========================
+    // 5. Same Front Face
+    // =========================
+
+    const float s = 1.0f;
+
+    Vector3f normal(0.0f, 0.0f, 1.0f);
+
+
+    // =========================================================
+    // Triangle 1
+    // =========================================================
+
+    Triangles t1(
+        Vector4f(-s, -s, s, 1.0f),
+        Vector4f( s, -s, s, 1.0f),
+        Vector4f( s,  s, s, 1.0f)
+    );
+
+    t1.setColors({
+        Vector3f(1.0f, 1.0f, 1.0f),
+        Vector3f(1.0f, 1.0f, 1.0f),
+        Vector3f(1.0f, 1.0f, 1.0f)
+    });
+
+    t1.setNormal(normal, normal, normal);
+
+    t1.setUV(
+        Vector2f(0.0f, 0.0f),
+        Vector2f(1.0f, 0.0f),
+        Vector2f(1.0f, 1.0f)
+    );
+
+
+    // =========================================================
+    // Triangle 2
+    // =========================================================
+
+    Triangles t2(
+        Vector4f(-s, -s, s, 1.0f),
+        Vector4f( s,  s, s, 1.0f),
+        Vector4f(-s,  s, s, 1.0f)
+    );
+
+    t2.setColors({
+        Vector3f(1.0f, 1.0f, 1.0f),
+        Vector3f(1.0f, 1.0f, 1.0f),
+        Vector3f(1.0f, 1.0f, 1.0f)
+    });
+
+    t2.setNormal(normal, normal, normal);
+
+    t2.setUV(
+        Vector2f(0.0f, 0.0f),
+        Vector2f(1.0f, 1.0f),
+        Vector2f(0.0f, 1.0f)
+    );
+
+
+    // =========================================================
+    // 第一次：Container
+    // =========================================================
+
+    render::RenderTriangles(
+        t1,
+        framebuffer,
+        depthbuffer,
+        MVP,
+        width,
+        height,
         M,
         V,
-        P
+        light,
+        cameraPos,
+        containerTexture
     );
 
-    // ============================================================
-    // 9. Light
-    // ============================================================
-
-    // 放在摄像机右上方
-    // 这样比较容易观察 Specular
-    float shininess = 128.0f;
-    Light light(
-        Vector3f(-1.0f, 2.0f, 2.0f),
-        Vector3f(1.0f, 1.0f, 1.0f),
-        3.0f,      // intensity
-        0.3f,      // ambient
-        shininess
+    render::RenderTriangles(
+        t2,
+        framebuffer,
+        depthbuffer,
+        MVP,
+        width,
+        height,
+        M,
+        V,
+        light,
+        cameraPos,
+        containerTexture
     );
 
-    // Blinn-Phong shininess
-    //
-    // 8   -> 高光很宽
-    // 32  -> 比较明显
-    // 64  -> 更集中
-    // 128 -> 非常集中
+    depthbuffer.clear();
+    // =========================================================
+    // 第二次：Smile
+    // =========================================================
 
-    // ============================================================
-    // 10. Render
-    // ============================================================
+    render::RenderTriangles(
+        t1,
+        framebuffer,
+        depthbuffer,
+        MVP,
+        width,
+        height,
+        M,
+        V,
+        light,
+        cameraPos,
+        smileTexture
+    );
 
-    for (Triangles& triangle : triangles)
-    {
-        render::RenderTriangles(
-            triangle,
-            framebuffer,
-            depthbuffer,
-            MVP,
-            width,
-            height,
-            M,
-            V,
-            light,
-            cameraPos
-        );
-    }
+    render::RenderTriangles(
+        t2,
+        framebuffer,
+        depthbuffer,
+        MVP,
+        width,
+        height,
+        M,
+        V,
+        light,
+        cameraPos,
+        smileTexture
+    );
 
-    // ============================================================
-    // 11. Save
-    // ============================================================
 
-    framebuffer.save("cube_specular_test.ppm");
+    // =========================
+    // 6. Save
+    // =========================
 
-    std::cout << "====================================\n";
-    std::cout << "Cube Blinn-Phong test finished.\n";
-    std::cout << "Saved: cube_specular_test.ppm\n";
-    std::cout << "====================================\n";
+    framebuffer.save("same_face_two_texture_test.ppm");
+
+    std::cout << "Same face two texture test finished."
+              << std::endl;
 
     return 0;
 }

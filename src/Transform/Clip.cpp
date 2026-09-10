@@ -65,6 +65,7 @@ Vertex Clip::intersect(const Vertex& _a, const Vertex& _b, ClipPlane clipPlane){
     result.color = _a.color * (1.0f - t) + t * _b.color;
     result.normal = _a.normal * (1.0f - t) + t * _b.normal;
     result.worldPos = _a.worldPos * (1.0f - t) + t * _b.worldPos;
+    result.uv = _a.uv * (1.0f - t) + t * _b.uv;
     return result;
 }
 
@@ -95,9 +96,9 @@ std::vector<Vertex> Clip::clipSinglePlane (const std::vector<Vertex>& polygon, C
 
 std::vector<Vertex> Clip::clipTriangle(const Triangles& t, bool whetherInterpolate = true){
     std::vector<Vertex> output = {
-        Vertex(t.getV0(), t.color[0], t.normal[0], t.position[0]),
-        Vertex(t.getV1(), t.color[1], t.normal[1], t.position[1]),
-        Vertex(t.getV2(), t.color[2], t.normal[2], t.position[2])
+        Vertex(t.getV0(), t.color[0], t.normal[0], t.position[0], t.uv[0]),
+        Vertex(t.getV1(), t.color[1], t.normal[1], t.position[1], t.uv[1]),
+        Vertex(t.getV2(), t.color[2], t.normal[2], t.position[2], t.uv[2])
     };
 
     output = clipSinglePlane(output, ClipPlane::Left);
@@ -135,6 +136,9 @@ std::vector<Triangles> Clip::toTriangleList(const std::vector<Vertex> polyon){
         t.position[0] = polyon[0].worldPos;
         t.position[1] = polyon[i].worldPos;
         t.position[2] = polyon[i + 1].worldPos;
+        t.uv[0] = polyon[0].uv;
+        t.uv[1] = polyon[i].uv;
+        t.uv[2] = polyon[i + 1].uv;
         output.push_back(t);
     }
     return output;

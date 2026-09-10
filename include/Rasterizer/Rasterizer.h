@@ -4,6 +4,7 @@
 #include "Framebuffer/Framebuffer.h"
 #include "DepthBuffer/Depthbuffer.h"
 #include "Shader/Light.h"
+#include "Texture/Texture.h"
 
 class Rasterizer
 {
@@ -12,6 +13,6 @@ private:
     Vector3f barycentric(const float x, const float y , const Triangles& triangles) const;
 public:
     Rasterizer() = default;
-    void drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Light& light, const Vector3f& cameraPos) const ;
+    void drawTriangles(const Triangles& triangles, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Light& light, const Vector3f& cameraPos, const Texture& texture) const ;
 };
 
