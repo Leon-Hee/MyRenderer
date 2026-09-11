@@ -9,13 +9,10 @@
 #include "Transform/Transform.h"
 #include "Shader/Light.h"
 #include "Shader/Material.h"
+#include "Shadow/ShadowMap.h"
 
 int main()
 {
-    // =========================
-    // 1. Framebuffer / Depthbuffer
-    // =========================
-
     const int width = 800;
     const int height = 800;
 
@@ -28,11 +25,6 @@ int main()
 
     depthbuffer.clear();
 
-
-    // =========================
-    // 2. Load OBJ
-    // =========================
-
     std::vector<Triangles> model =
         OBJLoader::load(
             "obj/african_head/african_head.obj"
@@ -41,11 +33,6 @@ int main()
     std::cout << "Loaded triangles: "
               << model.size()
               << std::endl;
-
-
-    // =========================
-    // 3. Model / View / Projection
-    // =========================
 
     Vector3f cameraPos(
         0.0f,
@@ -70,11 +57,6 @@ int main()
 
     Mat4 MVP = P * V * M;
 
-
-    // =========================
-    // 4. Light
-    // =========================
-
     Light light(
         Vector3f(3.0f, 4.0f, 3.0f),
         Vector3f(1.0f, 1.0f, 1.0f),
@@ -85,37 +67,62 @@ int main()
 
     light.ambient_intensity = 0.1f;
 
-
-    // =========================
-    // 5. Material
-    // =========================
-
     Texture texture(
-    "obj/african_head/african_head_diffuse.tga"
-);
+        "obj/african_head/african_head_diffuse.tga"
+    );
 
-Material material;
+    Material material;
 
-material.diffuseColor = Vector3f(
-    1.0f,
-    1.0f,
-    1.0f
-);
+    material.diffuseColor = Vector3f(
+        1.0f,
+        1.0f,
+        1.0f
+    );
 
-material.specularColor = Vector3f(
-    0.2f,
-    0.2f,
-    0.2f
-);
+    material.specularColor = Vector3f(
+        0.2f,
+        0.2f,
+        0.2f
+    );
 
-material.shininess = 16.0f;
+    material.shininess = 16.0f;
 
-material.diffuseTexture = &texture;
+    material.diffuseTexture = &texture;
 
+    ShadowMap shadowMap(
+        1024,
+        1024
+    );
 
-    // =========================
-    // 6. Render
-    // =========================
+    Mat4 lightView = lookAt(
+        light.position,
+        Vector3f(0.0f, 0.0f, 0.0f),
+        Vector3f(0.0f, 1.0f, 0.0f)
+    );
+
+    Mat4 lightProjection = orthographic(
+        -3.0f,
+        3.0f,
+        -3.0f,
+        3.0f,
+        0.1f,
+        10.0f
+    );
+
+    Mat4 lightMVP =
+        lightProjection *
+        lightView *
+        M;
+
+    shadowMap.clear();
+
+    for (Triangles& triangle : model)
+    {
+        shadowMap.renderTriangle(
+            triangle,
+            lightMVP
+        );
+    }
 
     for (Triangles& triangle : model)
     {
@@ -130,20 +137,17 @@ material.diffuseTexture = &texture;
             V,
             light,
             cameraPos,
-            material
+            material,
+            shadowMap,
+            lightMVP
         );
     }
 
-
-    // =========================
-    // 7. Save
-    // =========================
-
     framebuffer.save(
-        "african_head_test.ppm"
+        "african_head_shadow.ppm"
     );
 
-    std::cout << "African head render finished."
+    std::cout << "African head shadow render finished."
               << std::endl;
 
     return 0;

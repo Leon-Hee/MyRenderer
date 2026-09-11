@@ -24,3 +24,12 @@ Mat4 perspective(float fov, float aspect, float zNear, float zFar);
 Mat4 getMVP(const Mat4& model, const Mat4& view, const Mat4& projection);
 
 Vector3f perspectiveDivide(const Vector4f& clip);
+
+Mat4 orthographic(
+    float left,
+    float right,
+    float bottom,
+    float top,
+    float zNear,
+    float zFar
+);

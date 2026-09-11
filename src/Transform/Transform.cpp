@@ -100,3 +100,24 @@ Vector3f perspectiveDivide(const Vector4f& clip){
     }
     return Vector3f(clip.x / clip.w, clip.y / clip.w, clip.z / clip.w);
 }
+
+Mat4 orthographic(
+    float left,
+    float right,
+    float bottom,
+    float top,
+    float zNear,
+    float zFar)
+{
+    Mat4 result = Mat4::Identity();
+
+    result[0][0] = 2.0f / (right - left);
+    result[1][1] = 2.0f / (top - bottom);
+    result[2][2] = -2.0f / (zFar - zNear);
+
+    result[0][3] = -(right + left) / (right - left);
+    result[1][3] = -(top + bottom) / (top - bottom);
+    result[2][3] = -(zFar + zNear) / (zFar - zNear);
+
+    return result;
+}

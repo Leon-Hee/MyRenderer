@@ -8,8 +8,9 @@
 #include "Shader/Light.h"
 #include "Texture/Texture.h"
 #include "Shader/Material.h"
+#include "Shadow/ShadowMap.h"
 
 namespace render{
-    void RenderTriangles(Triangles& t1, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4& MVP, int width, int height, const Mat4& M, const Mat4& V, const Light& light, const Vector3f& cameraPos, const Material& material);
+    void RenderTriangles(Triangles& t1, Framebuffer& framebuffer, Depthbuffer& depthbuffer, const Mat4& MVP, int width, int height, const Mat4& M, const Mat4& V, const Light& light, const Vector3f& cameraPos, const Material& material, const ShadowMap& shadowMap, const Mat4& lightMVP);
     bool isFront(const Vector3f& v0, const Vector3f& v1, const Vector3f& v2);
 }
